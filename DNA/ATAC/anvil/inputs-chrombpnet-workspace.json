@@ -1,0 +1,15 @@
+{
+  "chrombpnet_bias.peaks_file": "File",
+  "chrombpnet_bias.file_prefix_str": "String",
+  "chrombpnet_bias.chrome_size_file": "File",
+  "chrombpnet_bias.experiment_str": "String",
+  "chrombpnet_bias.non_peaks_file": "File",
+  "chrombpnet_bias.input_bam_file": "File",
+  "chrombpnet_bias.model_file": "File",
+  "chrombpnet_bias.chr_fold_path": "String",
+  "chrombpnet_bias.data_type": "String",
+  "chrombpnet_bias.bias_threshold_factor": "String",
+  "chrombpnet_bias.genome_fa_file": "File",
+  "chrombpnet_bias.output_dir": "String"
+}
+
