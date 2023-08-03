@@ -6,8 +6,8 @@ workflow chrombpnet_bias {
         String data_type
         File   genome_fa_file
         File   chrome_size_file
-	File   peaks_file
-	File   non_peaks_file
+	    File   peaks_file
+ 	    File   non_peaks_file
         String chr_fold_path
         String bias_threshold_factor
         String output_dir

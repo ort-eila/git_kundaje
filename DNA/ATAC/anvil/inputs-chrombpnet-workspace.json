@@ -1,15 +1,15 @@
 {
-  "chrombpnet_bias.peaks_file": "File",
-  "chrombpnet_bias.file_prefix_str": "String",
-  "chrombpnet_bias.chrome_size_file": "File",
+  "chrombpnet_bias.peaks_file": "~/chrombpnet_tutorial/data/peaks_no_blacklist.bed",
+  "chrombpnet_bias.file_prefix_str": "try1",
+  "chrombpnet_bias.chrome_size_file": "~/chrombpnet_tutorial/data/downloads/hg38.chrom.sizes",
   "chrombpnet_bias.experiment_str": "String",
-  "chrombpnet_bias.non_peaks_file": "File",
-  "chrombpnet_bias.input_bam_file": "File",
+  "chrombpnet_bias.non_peaks_file": "~/chrombpnet_tutorial/data/output_negatives.bed",
+  "chrombpnet_bias.input_bam_file": "~/chrombpnet_tutorial/data/downloads/merged.bam",
   "chrombpnet_bias.model_file": "File",
-  "chrombpnet_bias.chr_fold_path": "String",
-  "chrombpnet_bias.data_type": "String",
-  "chrombpnet_bias.bias_threshold_factor": "String",
-  "chrombpnet_bias.genome_fa_file": "File",
-  "chrombpnet_bias.output_dir": "String"
+  "chrombpnet_bias.chr_fold_path": "~/chrombpnet_tutorial/data/splits/fold_0.json",
+  "chrombpnet_bias.data_type": "ATAC",
+  "chrombpnet_bias.bias_threshold_factor": "~/chrombpnet_tutorial/bias_model/ENCSR868FGK_bias_fold_0.h5",
+  "chrombpnet_bias.genome_fa_file": "~/chrombpnet_tutorial/data/downloads/hg38.fa",
+  "chrombpnet_bias.output_dir": "~/chrombpnet_tutorial/chrombpnet_model/"
 }
 
