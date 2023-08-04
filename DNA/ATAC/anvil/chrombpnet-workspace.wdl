@@ -16,7 +16,7 @@ workflow chrombpnet_bias {
     String experiment_str
 	}
 
-	call run_bias {
+	call run_bias_task {
 	  input:
       input_bam_file = input_bam_file,
       data_type = data_type,
