@@ -65,8 +65,8 @@ task run_bias {
 		##bias
 
 		#echo "python  ${g_file} -r ${p_file} -m ${model_file} -o /project/shap_dir_peaks/${experiment_str} "
-
-		echo "!!!!!!!copying all files to cromwell_root folder"
+        echo "1. ibam is ${ibam}
+		echo "2. copying all files to cromwell_root folder"
 	
 	}
 	
