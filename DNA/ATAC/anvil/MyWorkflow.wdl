@@ -4,27 +4,32 @@ workflow MyWorkflow {
     File inputFile2
   }
 
-  task MyTask {
-    input {
-      File input1 = inputFile1
-      File input2 = inputFile2
-    }
+  call PrintFileContents {
+    input:
+      inputFile1 = inputFile1,
+      inputFile2 = inputFile2
+  }
+}
 
-    command {
-      # Your task command here that processes input1 and input2
-      echo "Running MyTask with ${input1} and ${input2}"
-    }
+task PrintFileContents {
+  File inputFile1
+  File inputFile2
 
-    output {
-      File output_file = "output.txt"
-    }
+  command {
+    # Read and print the content of inputFile1
+    echo "Content of inputFile1:"
+    cat "${inputFile1}"
 
-    runtime {
-      docker: "ubuntu:latest" // Or specify an appropriate Docker container
-    }
+    # Read and print the content of inputFile2
+    echo "Content of inputFile2:"
+    cat "${inputFile2}"
   }
 
   output {
-    File final_output = MyTask.output_file
+    File tempOutput = write_lines(["Content of inputFile1:", "${inputFile1}", "", "Content of inputFile2:", "${inputFile2}"])
+  }
+
+  runtime {
+    docker: "ubuntu:latest" // Or specify an appropriate Docker container for 'cat' and 'echo' commands
   }
 }
