@@ -31,12 +31,12 @@ workflow chrombpnet_bias {
             model_file = model_file,
             experiment_str = experiment_str
 	}
-	output {
-	  #bias model that trains on the observed accessibility in non peak regions
-          File models_bias_h5 = "${experiment_str}.bias.h5"
+#	output {
+#	  #bias model that trains on the observed accessibility in non peak regions
+ #         File models_bias_h5 = "${experiment_str}.bias.h5"
           #Train and validation loss per epoch 
-          File logs_bias_log = "${experiment_str}.bias.log"
-	}
+  #        File logs_bias_log = "${experiment_str}.bias.log"
+#	}
 }
 
 task run_bias {
