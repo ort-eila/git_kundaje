@@ -64,28 +64,28 @@ task run_bias {
 
 		##bias
 
-		echo "python  ${g_file} -r ${p_file} -m ${model_file} -o /project/shap_dir_peaks/${experiment_str} "
+		#echo "python  ${g_file} -r ${p_file} -m ${model_file} -o /project/shap_dir_peaks/${experiment_str} "
 
-		echo "copying all files to cromwell_root folder"
+		echo "!!!!!!!copying all files to cromwell_root folder"
 	
 	}
 	
-  output {
-    #bias model that trains on the observed accessibility in non peak regions
-    File models_bias_h5 = "${experiment_str}.bias.h5"
-    #Train and validation loss per epoch 
-    File logs_bias_log = "${experiment_str}.bias.log"
-    }
+#  output {
+#    #bias model that trains on the observed accessibility in non peak regions
+#    File models_bias_h5 = "${experiment_str}.bias.h5"
+#    #Train and validation loss per epoch 
+#    File logs_bias_log = "${experiment_str}.bias.log"
+#    }
 
-  runtime {
-    docker: 'kundajelab/chrombpnet:latest'
-    memory: 50 + "GB"
-    bootDiskSizeGb: 50
-    disks: "local-disk 100 HDD"
-    gpuType: "nvidia-tesla-v100"
-    gpuCount: 1
-    nvidiaDriverVersion: "450.51.05" 
-    maxRetries: 1
-    }
+#  runtime {
+#    docker: 'kundajelab/chrombpnet:latest'
+#    memory: 50 + "GB"
+#    bootDiskSizeGb: 50
+#    disks: "local-disk 100 HDD"
+#    gpuType: "nvidia-tesla-v100"
+#    gpuCount: 1
+#    nvidiaDriverVersion: "450.51.05" 
+#    maxRetries: 1
+#    }
 }
 
