@@ -1,0 +1,12 @@
+{
+  "ChrombpnetBias.yourChromeSize": "chrombpnet_tutorial/data/downloads/hg38.chrom.sizes",
+  "ChrombpnetBias.yourDataType": "ATAC",
+  "ChrombpnetBias.yourGenome": "chrombpnet_tutorial/data/downloads/hg38.fa",
+  "ChrombpnetBias.yourOutputPath": "chrombpnet_tutorial/chrombpnet_model/",
+  "ChrombpnetBias.yourPeaks": "chrombpnet_tutorial/data/peaks_no_blacklist.bed",
+  "ChrombpnetBias.yourName": "Eila",
+  "ChrombpnetBias.yourBam": "chrombpnet_tutorial/data/downloads/merged.bam",
+  "ChrombpnetBias.yourFoldPath": "chrombpnet_tutorial/data/splits/fold_0.json",
+  "ChrombpnetBias.yourBiasModelPath": "chrombpnet_tutorial/bias_model/ENCSR868FGK_bias_fold_0.h5",
+  "ChrombpnetBias.yourNoPeaks": "chrombpnet_tutorial/data/output_negatives.bed"
+}
