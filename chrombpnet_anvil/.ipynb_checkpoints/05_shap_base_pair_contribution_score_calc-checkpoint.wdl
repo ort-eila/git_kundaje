@@ -57,7 +57,7 @@ task run_shap_base_pair_contribution_score_calc {
   output {
     File response = stdout()
     File profile_shap_scores = "${experiment}.profile_scores.h5"
-		File interpreted_regions = "${experiment}.interpreted_regions.bed"
+    File interpreted_regions = "${experiment}.interpreted_regions.bed"
     File count_scores = "${experiment}.count_scores.h5"
     File ls_output = "ls_files.txt"
   }
