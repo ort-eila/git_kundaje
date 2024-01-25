@@ -8,6 +8,7 @@ workflow wf_split_dataset_train_valid_test {
     File   yourChromSizes
     String yourTestChroms
     String yourValidationChroms
+    String yourChromosomesToInclude
   }
   
 
@@ -16,7 +17,8 @@ workflow wf_split_dataset_train_valid_test {
       outputPrefix = yourOutputPrefix,
       chromSizes = yourChromSizes,
       testChroms = yourTestChroms,
-      validationChroms = yourValidationChroms
+      validationChroms = yourValidationChroms,
+      chromosomesToInclude = yourChromosomesToInclude
   }
   
   output {
@@ -34,6 +36,7 @@ task run_split_train_valid_test {
     File    chromSizes
     String	testChroms
     String	validationChroms
+    String  chromosomesToInclude
   }
   
   command {
@@ -41,7 +44,7 @@ task run_split_train_valid_test {
     # cd /chrombpnet
     # git clone https://github.com/kundajelab/chrombpnet.git
     # pip install -e chrombpnet
-
+    cat ${chromosomesToInclude}
     # Q: Do we need to filter out any chromosome before the split? compare the results. 
     # TODO: need to be executed 5 times to get all the fold_0, fold_1, fold_2, fold_3, fold_4
     mkdir -p ./outputPath/splits/ 
