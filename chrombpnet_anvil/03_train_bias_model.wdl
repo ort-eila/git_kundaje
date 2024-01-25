@@ -15,7 +15,7 @@ version 1.0
 
 workflow wf_train_bias_model {
   input {
-    File   yourBam
+    File   yourBamFragTagSelection
     String yourDataType
     File   yourGenome
     File   yourChromeSize
@@ -24,12 +24,13 @@ workflow wf_train_bias_model {
     File   yourChrFoldPath
     Float  yourBiasThresholdFactor
     String yourFilePrefix
+    String yourExecutionOption
   }
   
 
   call run_train_bias_mode {
     input: 
-      ibam = yourBam,
+      bamFragTagSelection = yourBamFragTagSelection,
       dataType = yourDataType,
       genome = yourGenome,
       chromeSize = yourChromeSize,
@@ -37,7 +38,8 @@ workflow wf_train_bias_model {
       noPeaks = yourNoPeaks,
       chrFoldPath = yourChrFoldPath,
       biasThresholdFactor = yourBiasThresholdFactor,
-      filePrefix = yourFilePrefix
+      filePrefix = yourFilePrefix,
+      executionOption = yourExecutionOption
 
   }
   output {
@@ -50,7 +52,7 @@ workflow wf_train_bias_model {
 
 task run_train_bias_mode {
   input {
-    File   ibam
+    File   bamFragTagSelection
     String dataType
     File   genome
     File   chromeSize
@@ -59,6 +61,7 @@ task run_train_bias_mode {
     File   chrFoldPath
     Float  biasThresholdFactor
     String filePrefix
+    String executionOption
   }
   
   command {
@@ -71,11 +74,10 @@ task run_train_bias_mode {
     # TODO: check dataType quotes
     echo 'chrombpnet bias pipeline  -ibam ${ibam} -d "${dataType}" -g ${genome} -c ${chromeSize} -p ${peaks} -n ${noPeaks} -fl ${chrFoldPath} -b ${biasThresholdFactor} -o outputPath/bias_model -fp ${filePrefix} '
     ls -l outputPath/bias_model > ls_files.txt
-    # TODO: ifrag, itag, ibam options
     # TODO: add default values.
     # TODO: missing output file: the bias model folder. expose a report. + mapping to the table Vivek (copy for other scripts - Eila)
     chrombpnet bias pipeline \
-    -ibam ${ibam} \
+    -${executionOption} ${bamFragTagSelection} \
     -d "${dataType}" \
     -g ${genome} \
     -c ${chromeSize} \
