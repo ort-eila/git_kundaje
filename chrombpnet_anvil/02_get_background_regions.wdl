@@ -10,7 +10,6 @@ workflow wf_get_background_regions {
     File   yourBlackRegions
     File   yourFoldPath
   }
-  
 
   call run_get_background_regions_test {
     input: 
@@ -23,6 +22,7 @@ workflow wf_get_background_regions {
   output {
     File workflow_stdout_output = run_get_background_regions_test.response
     File workflow_ls_output = run_get_background_regions_test.ls_output
+    File workflow_output_negatives = run_get_background_regions_test.output_negatives
   }
 }
 
@@ -54,6 +54,7 @@ task run_get_background_regions_test {
   output {
     File response = stdout()
     File ls_output = "ls_files.txt"
+    File output_negatives = "./outputPath/output_negatives.bed"
   }
 
   runtime {
