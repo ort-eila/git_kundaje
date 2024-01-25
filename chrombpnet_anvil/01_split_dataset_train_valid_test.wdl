@@ -44,12 +44,15 @@ task run_split_train_valid_test {
     # cd /chrombpnet
     # git clone https://github.com/kundajelab/chrombpnet.git
     # pip install -e chrombpnet
-    cat ${chromosomesToInclude}
     # Q: Do we need to filter out any chromosome before the split? compare the results. 
     # TODO: need to be executed 5 times to get all the fold_0, fold_1, fold_2, fold_3, fold_4
-    mkdir -p ./outputPath/splits/ 
-    echo 'outputPrefix (-op) is ${outputPrefix}. chromSizes (-c) is ${chromSizes}. testChroms (-tcr) is ${testChroms}. validationChroms (-vcr) is ${validationChroms}.'
-    chrombpnet prep splits -c ${chromSizes} -tcr ${testChroms} -vcr ${validationChroms} -op ./outputPath/splits/${outputPrefix}
+    mkdir -p ./outputPath/splits/
+    # replace spaces in arg with newlines 
+    filter_str="${chromosomesToInclude// /\n}"
+    chromSizesFiltered=./outputPath/hg38.chrom.sizes.filtered
+    echo $filter_str | xargs -I {} grep -w {} ${chromSizes} > ${chromSizesFiltered}
+    echo 'outputPrefix (-op) is ${outputPrefix}. chromSizes (-c) is ${chromSizesFiltered}. testChroms (-tcr) is ${testChroms}. validationChroms (-vcr) is ${validationChroms}.'
+    chrombpnet prep splits -c ${chromSizesFiltered} -tcr ${testChroms} -vcr ${validationChroms} -op ./outputPath/splits/${outputPrefix}
     ls -l outputPath/splits/ > ls_files.txt
   }
 
