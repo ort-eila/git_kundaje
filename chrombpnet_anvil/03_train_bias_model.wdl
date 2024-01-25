@@ -15,6 +15,7 @@ version 1.0
 
 workflow wf_train_bias_model {
   input {
+    String yourExecutionOption
     File   yourBamFragTagSelection
     String yourDataType
     File   yourGenome
@@ -24,12 +25,13 @@ workflow wf_train_bias_model {
     File   yourChrFoldPath
     Float  yourBiasThresholdFactor
     String yourFilePrefix
-    String yourExecutionOption
+    Float? yourOutlierThreshold
   }
   
 
   call run_train_bias_mode {
-    input: 
+    input:
+      executionOption = yourExecutionOption,
       bamFragTagSelection = yourBamFragTagSelection,
       dataType = yourDataType,
       genome = yourGenome,
@@ -39,12 +41,12 @@ workflow wf_train_bias_model {
       chrFoldPath = yourChrFoldPath,
       biasThresholdFactor = yourBiasThresholdFactor,
       filePrefix = yourFilePrefix,
-      executionOption = yourExecutionOption
-
+      outlierThreshold = yourOutlierThreshold
   }
   output {
     File workflow_stdout_output = run_train_bias_mode.response
     File workflow_ls_output = run_train_bias_mode.ls_output
+    # TODO: vivek, what is the output expected. and map it to the table
   }
 }
 
@@ -52,6 +54,7 @@ workflow wf_train_bias_model {
 
 task run_train_bias_mode {
   input {
+    String executionOption
     File   bamFragTagSelection
     String dataType
     File   genome
@@ -61,7 +64,7 @@ task run_train_bias_mode {
     File   chrFoldPath
     Float  biasThresholdFactor
     String filePrefix
-    String executionOption
+    Float? outlierThreshold  # Optional without default value
   }
   
   command {
@@ -72,7 +75,8 @@ task run_train_bias_mode {
 
     mkdir -p outputPath/bias_model
     # TODO: check dataType quotes
-    echo 'chrombpnet bias pipeline  -ibam ${ibam} -d "${dataType}" -g ${genome} -c ${chromeSize} -p ${peaks} -n ${noPeaks} -fl ${chrFoldPath} -b ${biasThresholdFactor} -o outputPath/bias_model -fp ${filePrefix} '
+    defaultOutlierThreshold=$(/bin/bash -c "chrombpnet bias pipeline -oth | grep 'OUTLIER_THRESHOLD:' | awk '{print \$2}'")
+    echo 'chrombpnet bias pipeline  -bamFragTagSelection ${bamFragTagSelection} -d "${dataType}" -g ${genome} -c ${chromeSize} -p ${peaks} -n ${noPeaks} -fl ${chrFoldPath} -b ${biasThresholdFactor} -o outputPath/bias_model -fp ${filePrefix} '
     ls -l outputPath/bias_model > ls_files.txt
     # TODO: add default values.
     # TODO: missing output file: the bias model folder. expose a report. + mapping to the table Vivek (copy for other scripts - Eila)
@@ -85,6 +89,7 @@ task run_train_bias_mode {
     -n ${noPeaks} \
     -fl ${chrFoldPath} \
     -b ${biasThresholdFactor} \
+    -oth ${coalesce(outlierThreshold, defaultOutlierThreshold)} \
     -o outputPath/bias_model \
     -fp ${filePrefix} \
   }
