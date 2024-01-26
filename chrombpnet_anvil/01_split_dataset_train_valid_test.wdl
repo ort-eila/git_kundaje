@@ -1,91 +1,85 @@
 version 1.0
 
-# chrombpnet prep splits -c ~/chrombpnet_tutorial/data/downloads/hg38.chrom.subset.sizes -tcr chr1 chr3 chr6 -vcr chr8 chr20 -op ~/chrombpnet_tutorial/data/splits/fold_0
-
 workflow wf_split_dataset_train_valid_test {
   input {
     String yourOutputPrefix
-    File   yourChromSizes
+    File  yourChromSizes
     String yourTestChroms
     String yourValidationChroms
     String yourChromosomesToInclude
   }
-  
 
   call run_split_train_valid_test {
-    input: 
+    input:
       outputPrefix = yourOutputPrefix,
       chromSizes = yourChromSizes,
       testChroms = yourTestChroms,
       validationChroms = yourValidationChroms,
       chromosomesToInclude = yourChromosomesToInclude
   }
-  
+
   output {
+    File splits_json = run_split_train_valid_test.splits
     File workflow_stdout_output = run_split_train_valid_test.response
     File workflow_ls_output = run_split_train_valid_test.ls_output
-    File workflow_splits = run_split_train_valid_test.splits
   }
 }
 
-#################END OF WORKFLOW
-
 task run_split_train_valid_test {
   input {
-    String  outputPrefix
-    File    chromSizes
-    String	testChroms
-    String	validationChroms
-    String  chromosomesToInclude
-  }
-  
-  command {
-    # cd /; mkdir chrombpnet
-    # cd /chrombpnet
-    # git clone https://github.com/kundajelab/chrombpnet.git
-    # pip install -e chrombpnet
-    cat ${chromosomesToInclude}
-    # Q: Do we need to filter out any chromosome before the split? compare the results. 
-    # TODO: need to be executed 5 times to get all the fold_0, fold_1, fold_2, fold_3, fold_4
-    mkdir -p ./outputPath/splits/ 
-    echo 'outputPrefix (-op) is ${outputPrefix}. chromSizes (-c) is ${chromSizes}. testChroms (-tcr) is ${testChroms}. validationChroms (-vcr) is ${validationChroms}.'
-    chrombpnet prep splits -c ${chromSizes} -tcr ${testChroms} -vcr ${validationChroms} -op ./outputPath/splits/${outputPrefix}
-    ls -l outputPath/splits/ > ls_files.txt
+    String outputPrefix
+    File  chromSizes
+    String testChroms
+    String validationChroms
+    String chromosomesToInclude
   }
 
+  command <<<
+    
+    
+    set -euo pipefail
+    IFS=$'\n'  # Set field separator to newline
+
+    
+    # Create output directory
+    outputPath="./outputPath/splits"
+    mkdir -p "$outputPath"
+
+    # Declare variables for clarity
+    String chromSizesFiltered = "{outputPath}/chrom.sizes.filtered"
+
+    # Filter chromosomes
+    echo "Filtering chromosomes..."
+    for chr in ${chromosomesToInclude}; do
+      grep -x "${chr}" "${chromSizes}" >> "${chromSizesFiltered}"
+    done
+
+    # Log the filtered chromosome sizes file
+    echo "Filtered chromosome sizes file: ${chromSizesFiltered}"
+
+    # Run chrombpnet command
+    echo "Running chrombpnet command..."
+    chrombpnet prep splits -c "${chromSizesFiltered}" -tcr "${testChroms}" -vcr "${validationChroms}" -op "${outputPath}/${outputPrefix}"
+
+    # List files in the output directory
+    echo "Listing files in the output directory..."
+    ls -l "${outputPath}/" > ls_files.txt
+
+    # Log response from stdout
+    echo "Logging response from stdout..."
+    cat "${outputPath}/${outputPrefix}.json"
+  >>>
+
   output {
-    File response = stdout()
-    File ls_output = "ls_files.txt"
     File splits = "./outputPath/splits/${outputPrefix}.json"
+    File response = stdout()
+    File ls_output = "./outputPath/splits/ls_files.txt"
   }
 
   runtime {
     docker: 'kundajelab/chrombpnet:latest'
-    memory: 5 + "GB"
+    memory: 4 + "GB"
     bootDiskSizeGb: 20
-    disks: "local-disk 20 HDD"
+    disks: "local-disk 50 HDD"
   }
 }
-
-#  runtime {
-#    cpu: '4'
-#    memory: 50 + "GB"
-#  }
-#  runtime {
-#    docker: 'kundajelab/chrombpnet:latest'
-#    memory: 20 + "GB"
-#  }
-
-  # runtime {
-        #       docker: 'kundajelab/chrombpnet:latest'
-        #       memory: 50 + "GB"
-        #       bootDiskSizeGb: 50
-        #       disks: "local-disk 100 HDD"
-        #       gpuType: "nvidia-tesla-v100"
-        #       gpuCount: 1
-        #       nvidiaDriverVersion: "450.51.05" 
-        #       maxRetries: 1
-  # }
-#}
-
-########################END OF TASK run_split_train_valid_test
