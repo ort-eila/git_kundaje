@@ -1,5 +1,4 @@
 version 1.0
-
 # chrombpnet bias pipeline \
 #         -ibam ~/chrombpnet_tutorial/data/downloads/merged.bam \
 #         -d "ATAC" \
@@ -13,6 +12,8 @@ version 1.0
 #         -fp k562 \
 # The command above outputs 
 
+# TODO: duplicate yourOutlierThreshold for other optional parameters
+# TODO: map the output to the tables (Vivek)
 workflow wf_train_bias_model {
   input {
     String yourExecutionOption
@@ -28,7 +29,6 @@ workflow wf_train_bias_model {
     Float? yourOutlierThreshold
   }
   
-
   call run_train_bias_mode {
     input:
       executionOption = yourExecutionOption,
@@ -43,14 +43,13 @@ workflow wf_train_bias_model {
       filePrefix = yourFilePrefix,
       outlierThreshold = yourOutlierThreshold
   }
+
   output {
     File workflow_stdout_output = run_train_bias_mode.response
     File workflow_ls_output = run_train_bias_mode.ls_output
     # TODO: vivek, what is the output expected. and map it to the table
   }
 }
-
-#################END OF WORKFLOW
 
 task run_train_bias_mode {
   input {
@@ -64,35 +63,28 @@ task run_train_bias_mode {
     File   chrFoldPath
     Float  biasThresholdFactor
     String filePrefix
-    Float? outlierThreshold  # Optional without default value
+    Float outlierThreshold = -999  # Set a default value of null
   }
-  
-  command {
-    # cd /; mkdir chrombpnet
-    # cd /chrombpnet
-    # git clone https://github.com/kundajelab/chrombpnet.git
-    # pip install -e chrombpnet
 
+  command <<<
     mkdir -p outputPath/bias_model
     # TODO: check dataType quotes
-    defaultOutlierThreshold=$(/bin/bash -c "chrombpnet bias pipeline -oth | grep 'OUTLIER_THRESHOLD:' | awk '{print \$2}'")
-    echo 'chrombpnet bias pipeline  -bamFragTagSelection ${bamFragTagSelection} -d "${dataType}" -g ${genome} -c ${chromeSize} -p ${peaks} -n ${noPeaks} -fl ${chrFoldPath} -b ${biasThresholdFactor} -o outputPath/bias_model -fp ${filePrefix} '
-    ls -l outputPath/bias_model > ls_files.txt
-    # TODO: add default values.
-    # TODO: missing output file: the bias model folder. expose a report. + mapping to the table Vivek (copy for other scripts - Eila)
-    chrombpnet bias pipeline \
-    -${executionOption} ${bamFragTagSelection} \
-    -d "${dataType}" \
-    -g ${genome} \
-    -c ${chromeSize} \
-    -p ${peaks} \
-    -n ${noPeaks} \
-    -fl ${chrFoldPath} \
-    -b ${biasThresholdFactor} \
-    -oth ${coalesce(outlierThreshold, defaultOutlierThreshold)} \
-    -o outputPath/bias_model \
-    -fp ${filePrefix} \
-  }
+    # defaultOutlierThreshold=$(/bin/bash -c "chrombpnet bias pipeline -oth | grep 'OUTLIER_THRESHOLD:' | awk '{print \$2}' ")
+    
+    # Build the chrombpnet command
+    command_string = "chrombpnet bias pipeline -~{executionOption} ~{bamFragTagSelection} -d \"~{dataType}\" -g ~{genome} -c ~{chromeSize} -p ~{peaks} -n ~{noPeaks} -fl ~{chrFoldPath} -b ~{biasThresholdFactor} -o outputPath/bias_model -fp ~{filePrefix}"
+
+    # Include -oth option only if outlierThreshold is not empty
+    if (outlierThreshold != -999) {
+      command_string += " -oth ~{outlierThreshold}"
+    }
+
+    echo "${command_string}" > chrombpnet_command.sh
+    chmod +x chrombpnet_command.sh
+
+    # Execute the chrombpnet command using the script file
+    ./chrombpnet_command.sh
+  >>>
 
   output {
     File response = stdout()
@@ -110,26 +102,3 @@ task run_train_bias_mode {
     maxRetries: 1
   }
 }
-
-#  runtime {
-#    cpu: '4'
-#    memory: 50 + "GB"
-#  }
-#  runtime {
-#    docker: 'kundajelab/chrombpnet:latest'
-#    memory: 20 + "GB"
-#  }
-
-  # runtime {
-        #       docker: 'kundajelab/chrombpnet:latest'
-        #       memory: 50 + "GB"
-        #       bootDiskSizeGb: 50
-        #       disks: "local-disk 100 HDD"
-        #       gpuType: "nvidia-tesla-v100"
-        #       gpuCount: 1
-        #       nvidiaDriverVersion: "450.51.05" 
-        #       maxRetries: 1
-  # }
-#}
-
-########################END OF TASK
