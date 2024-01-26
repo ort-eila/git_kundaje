@@ -12,11 +12,9 @@ version 1.0
 #         -fp k562 \
 # The command above outputs 
 
-# TODO: duplicate yourOutlierThreshold for other optional parameters
-# TODO: map the output to the tables (Vivek)
 workflow wf_train_bias_model {
   input {
-    String yourExecutionOption
+    String yourInputFileType
     File   yourBamFragTagSelection
     String yourDataType
     File   yourGenome
@@ -26,12 +24,24 @@ workflow wf_train_bias_model {
     File   yourChrFoldPath
     Float  yourBiasThresholdFactor
     String yourFilePrefix
-    Float? yourOutlierThreshold
+    Int? yourOutlierThreshold
+    Int? yourNumSamples
+    Int? yourInputlen
+    Int? yourOutputlen
+    Int? yourSeed
+    Int? yourEpochs
+    Int? yourEarlyStop
+    Float? yourLearningRate
+    String? yourTrack
+    Int? yourFilters
+    Int? yourNdilationLayers
+    Int? yourMaxJitter
+    Int? yourBatchSize
   }
   
   call run_train_bias_mode {
     input:
-      executionOption = yourExecutionOption,
+      inputFileType = yourInputFileType,
       bamFragTagSelection = yourBamFragTagSelection,
       dataType = yourDataType,
       genome = yourGenome,
@@ -41,19 +51,30 @@ workflow wf_train_bias_model {
       chrFoldPath = yourChrFoldPath,
       biasThresholdFactor = yourBiasThresholdFactor,
       filePrefix = yourFilePrefix,
-      outlierThreshold = yourOutlierThreshold
+      outlierThreshold = yourOutlierThreshold,
+      numSamples = yourNumSamples,
+      inputlen = yourInputlen,
+      outputlen = yourOutputlen,
+      seed = yourSeed,
+      epochs = yourEpochs,
+      earlyStop = yourEarlyStop,
+      learningRate = yourLearningRate,
+      track = yourTrack,
+      filters = yourFilters,
+      ndilationLayers = yourNdilationLayers,
+      maxJitter = yourMaxJitter,
+      batchSize = yourBatchSize
   }
 
   output {
     File workflow_stdout_output = run_train_bias_mode.response
     File workflow_ls_output = run_train_bias_mode.ls_output
-    # TODO: vivek, what is the output expected. and map it to the table
   }
 }
 
 task run_train_bias_mode {
   input {
-    String executionOption
+    String inputFileType
     File   bamFragTagSelection
     String dataType
     File   genome
@@ -63,31 +84,63 @@ task run_train_bias_mode {
     File   chrFoldPath
     Float  biasThresholdFactor
     String filePrefix
-    Float outlierThreshold = -999  # Set a default value of null
+    Int    outlierThreshold = -999
+    Int    numSamples = -999
+    Int    inputlen = -999
+    Int    outputlen = -999
+    Int    seed = -999
+    Int    epochs = -999
+    Int    earlyStop = -999
+    Float  learningRate = -999.0
+    String track = "na"
+    Int    filters = -999
+    Int    ndilationLayers = -999
+    Int    maxJitter = -999
+    Int    batchSize = -999
   }
 
   command <<<
-    mkdir -p outputPath/bias_model
-    # TODO: check dataType quotes
-    # defaultOutlierThreshold=$(/bin/bash -c "chrombpnet bias pipeline -oth | grep 'OUTLIER_THRESHOLD:' | awk '{print \$2}' ")
-    
+    set -euo pipefail
+    outputPath="outputPath/bias_model"
+    mkdir -p $outputPath
+  
     # Build the chrombpnet command
-    command_string = "chrombpnet bias pipeline -~{executionOption} ~{bamFragTagSelection} -d \"~{dataType}\" -g ~{genome} -c ~{chromeSize} -p ~{peaks} -n ~{noPeaks} -fl ~{chrFoldPath} -b ~{biasThresholdFactor} -o outputPath/bias_model -fp ~{filePrefix}"
+    command_string="chrombpnet bias pipeline -~{inputFileType} ~{bamFragTagSelection} -d \"~{dataType}\" -g ~{genome} -c ~{chromeSize} -p ~{peaks} -n ~{noPeaks} -fl ~{chrFoldPath} -b ~{biasThresholdFactor} -o $outputPath -fp ~{filePrefix}"
 
-    # Include -oth option only if outlierThreshold is not empty
-    if [ ~{outlierThreshold} -ne -999 ]; then
-      command_string="${command_string} -oth ~{outlierThreshold}"
-      echo "${command_string}"
-    fi
+    # Function to add optional parameters to the command string
+    add_parameter() {
+      local param_name=$1
+      local param_value=$2
+      if [ "${param_value}" != "na" ] && [ "${param_value}" != -999 ] && [ "${param_value}" != -999.0 ]; then
+        command_string="${command_string} -${param_name} ${param_value}"
+      fi
+    }
 
+    # Add optional parameters to the command string
+    add_parameter "oth" ~{outlierThreshold}
+    add_parameter "num-samples" ~{numSamples}
+    add_parameter "il" ~{inputlen}
+    add_parameter "ol" ~{outputlen}
+    add_parameter "s" ~{seed}
+    add_parameter "e" ~{epochs}
+    add_parameter "es" ~{earlyStop}
+    add_parameter "l" ~{learningRate}
+    add_parameter "track" ~{track}
+    add_parameter "fil" ~{filters}
+    add_parameter "dil" ~{ndilationLayers}
+    add_parameter "j" ~{maxJitter}
+    add_parameter "bs" ~{batchSize}
+
+    echo "command_string for execution is ${command_string}"
     echo "${command_string}" > chrombpnet_command.sh
     chmod +x chrombpnet_command.sh
 
-    # Execute the chrombpnet command using the script file
-    ./chrombpnet_command.sh
-
-    touch ls_files.txt
+    ls -l ${outputPath} > ls_files.txt
+    # Uncomment the line below to execute the chrombpnet command using the script file
+    # ./chrombpnet_command.sh
   >>>
+
+
 
 
   output {

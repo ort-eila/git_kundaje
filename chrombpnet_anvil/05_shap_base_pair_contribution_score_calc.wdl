@@ -5,6 +5,7 @@ workflow wf_shap_base_pair_contribution_score_calc {
     File    yourGenome
     File    yourRegions
     File    yourModel
+    File	yourChromSizes
     String  yourExperiment
   }
   
@@ -14,6 +15,7 @@ workflow wf_shap_base_pair_contribution_score_calc {
       genome = yourGenome,
       regions = yourRegions,
       model = yourModel,
+      chromSizes = yourChromSizes,
       experiment = yourExperiment
   }
   output {
@@ -32,6 +34,7 @@ task run_shap_base_pair_contribution_score_calc {
     File  genome
     File  regions
     File  model
+    File  chromSizes
     String  experiment
   }
   
@@ -45,13 +48,14 @@ task run_shap_base_pair_contribution_score_calc {
     # TODO: check if you have this output: shap.npz
     # RUN shap on smaller region
     mkdir -p /project/shap_dir_peaks/
-    echo "chrombpnet contribs_bw -g ${genome} -r ${regions} -m ${model} -o /project/shap_dir_peaks/${experiment}"
-    chrombpnet contribs_bw -g ${genome} -r ${regions} -m ${model} -o /project/shap_dir_peaks/${experiment} 
+    ls -l /project/shap_dir_peaks/ > ls_files.txt
+    echo "chrombpnet contribs_bw -g ${genome} -r ${regions} -m ${model} -c ${chromSizes} -op /project/shap_dir_peaks/${experiment}"
+    chrombpnet contribs_bw -g ${genome} -r ${regions} -m ${model} -c ${chromSizes} -op /project/shap_dir_peaks/${experiment} 
     echo "copying all files to cromwell_root folder"
     cp -r /project/shap_dir_peaks/${experiment}.profile_scores.h5 /cromwell_root/${experiment}.profile_scores.h5
     cp -r /project/shap_dir_peaks/${experiment}.count_scores.h5 /cromwell_root/${experiment}.count_scores.h5
     cp -r /project/shap_dir_peaks/${experiment}.interpreted_regions.bed /cromwell_root/${experiment}.interpreted_regions.bed
-    ls -l /project/shap_dir_peaks/ > ls_files.txt
+    
   }
 
   output {
