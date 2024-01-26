@@ -75,9 +75,9 @@ task run_train_bias_mode {
     command_string = "chrombpnet bias pipeline -~{executionOption} ~{bamFragTagSelection} -d \"~{dataType}\" -g ~{genome} -c ~{chromeSize} -p ~{peaks} -n ~{noPeaks} -fl ~{chrFoldPath} -b ~{biasThresholdFactor} -o outputPath/bias_model -fp ~{filePrefix}"
 
     # Include -oth option only if outlierThreshold is not empty
-    if (outlierThreshold != -999) {
-      command_string += " -oth ~{outlierThreshold}"
-    }
+    if [ ~{outlierThreshold} -ne -999 ]; then
+      command_string+=" -oth ~{outlierThreshold}"
+    fi
 
     echo "${command_string}" > chrombpnet_command.sh
     chmod +x chrombpnet_command.sh
