@@ -44,17 +44,17 @@ task run_get_background_regions_test {
     # pip install -e chrombpnet
 
     # Q: Is this making the right background? compare the results. output_negatives
-    mkdir -p ./outputPath
+    mkdir -p /cromwell_root/outputPath
     echo 'genome ${genome}. peaks ${peaks}. chromeSize ${chromeSize}. foldPath ${foldPath} '
-    chrombpnet prep nonpeaks -g ${genome} -p ${peaks} -c ${chromeSize} -fl ${foldPath} -br ${blackRegions} -o ./outputPath
-    ls ./outputPath
-    ls ./outputPath -l > ls_files.txt
+    chrombpnet prep nonpeaks -g ${genome} -p ${peaks} -c ${chromeSize} -fl ${foldPath} -br ${blackRegions} -o /cromwell_root/outputPath/output
+    ls /cromwell_root/outputPath
+    ls /cromwell_root/outputPath -l > /cromwell_root/ls_files.txt
   }
 
   output {
     File response = stdout()
     File ls_output = "ls_files.txt"
-    File output_negatives = "./outputPath/output_negatives.bed"
+    File output_negatives = "/cromwell_root/outputPath/output_negatives.bed"
   }
 
   runtime {

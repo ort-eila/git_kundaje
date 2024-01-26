@@ -76,7 +76,8 @@ task run_train_bias_mode {
 
     # Include -oth option only if outlierThreshold is not empty
     if [ ~{outlierThreshold} -ne -999 ]; then
-      command_string+=" -oth ~{outlierThreshold}"
+      command_string="${command_string} -oth ~{outlierThreshold}"
+      echo "${command_string}"
     fi
 
     echo "${command_string}" > chrombpnet_command.sh
@@ -84,7 +85,10 @@ task run_train_bias_mode {
 
     # Execute the chrombpnet command using the script file
     ./chrombpnet_command.sh
+
+    touch ls_files.txt
   >>>
+
 
   output {
     File response = stdout()

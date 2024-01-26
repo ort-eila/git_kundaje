@@ -32,37 +32,23 @@ workflow wf_modisco_find_motifs {
 
 task run_modisco_find_motifs_task {
   input {
-    String experiment
-    Array [File] shap
-    Int? mem_gb
-    Int? max_seqlets
-    Int? number_of_cpus
+    String profileOrCount
+    File shap.h5
+    Int max_seqlets
   }
   
   command {
-    # cd /; mkdir chrombpnet
-    # cd /chrombpnet
-    # git clone https://github.com/kundajelab/chrombpnet.git
-    # pip install -e chrombpnet
 
-    mkdir outputPath
-    echo 'experiment ${experiment}. shap ${shap}. mem_gb ${mem_gb}. max_seqlets ${max_seqlets}. number_of_cpus ${number_of_cpus}.'
-    
+    mkdir outputPath    
     # tfmodisco-lite
-    # modisco motifs -s ohe.npz -a shap.npz -n 2000 -o modisco_results.h5
-    modisco motifs -s ohe.npz -a shap.npz -n  ${max_seqlets} -o modisco_results.h5
-    # modisco motifs ${experiment} ${sep=',' shap} -n ${max_seqlets} -v
-    cp -r /project/modisco_profile /cromwell_root/
+    modisco motifs -i shap.h5 -n  ${max_seqlets} -o modisco_results.h5
+    cp -r /project/modisco_{} /cromwell_root/
     cp -r /project/modisco_counts /cromwell_root/
   }
 
   output {
     File response = stdout()
-    File ls_output = "ls_files.txt"
-    Array[File] modisco_profile_motifs = glob("modisco_profile/trimmed_logos/*")
-    Array[File] modisco_counts_motifs = glob("modisco_counts/trimmed_logos/*")
-    File modisco_profile_h5 = "modisco_profile/modisco_results.h5"
-    File modisco_counts_h5 = "modisco_counts/modisco_results.h5"
+    File modisco_h5 = "modisco_${profileOrCount}/modisco_results.h5"
   }
 
   runtime {
