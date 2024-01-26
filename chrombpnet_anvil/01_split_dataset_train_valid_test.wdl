@@ -19,7 +19,8 @@ workflow wf_split_dataset_train_valid_test {
   }
 
   output {
-    File splits_json = run_split_train_valid_test.splits
+    File workflow_splits_json = run_split_train_valid_test.splits
+    File workflow_chromSizesFiltered = run_split_train_valid_test.chromSizesFiltered
     File workflow_stdout_output = run_split_train_valid_test.response
     File workflow_ls_output = run_split_train_valid_test.ls_output
   }
@@ -33,7 +34,6 @@ task run_split_train_valid_test {
     String validationChroms
     String chromosomesToInclude
   }
-
   command <<<
     set -euo pipefail
     IFS=$'\n'  # Set field separator to newline
@@ -46,29 +46,35 @@ task run_split_train_valid_test {
     chromSizesFiltered="${outputPath}/chrom.sizes.filtered"
     echo "chromSizesFiltered is ${chromSizesFiltered}"
 
-    # Filter chromosomes
+    echo chromosomesToInclude is ~{chromosomesToInclude}
+
+    # Filter chromosomes using a loop
     echo "Filtering chromosomes..."
-    # Extract rows with specified chromosomes
-    echo "$chromosomesToInclude" | xargs -n 1 -I {} grep -w {} "$chromSizes" >> "$chromSizesFiltered" || true
+    for chrom in $(echo "~{chromosomesToInclude}" | tr ' ' '\n'); do
+      echo "Processing chromosome: $chrom"
+      grep -w "$chrom" "~{chromSizes}" >> "${chromSizesFiltered}" || true
+    done
 
     # Log the filtered chromosome sizes file
     echo "Filtered chromosome sizes file: ${chromSizesFiltered}"
-    head "$chromSizesFiltered"
-
+  
     # Run chrombpnet command
-    echo "Running chrombpnet command..."
-    chrombpnet prep splits -c "${chromSizesFiltered}" -tcr "${testChroms}" -vcr "${validationChroms}" -op "${outputPath}/${outputPrefix}"
+    # Echo example
+    echo "chrombpnet prep splits -c ${chromSizesFiltered} -tcr ~{testChroms} -vcr ~{validationChroms} -op ${outputPath}/~{outputPrefix}"
+    # touch ./outputPath/splits/~{outputPrefix}.json
+    # chrombpnet prep splits -c hg38.chrom.sizes -tcr chr1 chr3 chr6 -vcr chr8 chr20 -op ./outputPath/splits/fold_0
+    chrombpnet prep splits -c ${chromSizesFiltered} -tcr ~{testChroms} -vcr ~{validationChroms} -op ${outputPath}/~{outputPrefix}
 
     # List files in the output directory
     echo "Listing files in the output directory..."
-    ls -l "${outputPath}/" > ls_files.txt
-
- >>>
+    ls -l ${outputPath} > ls_files.txt
+  >>>
 
   output {
     File splits = "./outputPath/splits/${outputPrefix}.json"
+    File chromSizesFiltered = "./outputPath/splits/chrom.sizes.filtered"
     File response = stdout()
-    File ls_output = "./outputPath/splits/ls_files.txt"
+    File ls_output = "ls_files.txt"
   }
 
   runtime {
