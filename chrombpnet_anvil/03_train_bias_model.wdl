@@ -137,7 +137,7 @@ task run_train_bias_mode {
 
     ls -l ${outputPath} > ls_files.txt
     # Uncomment the line below to execute the chrombpnet command using the script file
-    # ./chrombpnet_command.sh
+    ./chrombpnet_command.sh
   >>>
 
 
