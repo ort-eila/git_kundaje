@@ -45,7 +45,6 @@ task run_split_train_valid_test {
     # Declare variables for clarity
     chromSizesFiltered="${outputPath}/chrom.sizes.filtered"
     echo "chromSizesFiltered is ${chromSizesFiltered}"
-    rm "$chromSizesFiltered"
 
     # Filter chromosomes
     echo "Filtering chromosomes..."
@@ -54,12 +53,15 @@ task run_split_train_valid_test {
 
     # Log the filtered chromosome sizes file
     echo "Filtered chromosome sizes file: ${chromSizesFiltered}"
+    head "$chromSizesFiltered"
+
+    # Run chrombpnet command
+    echo "Running chrombpnet command..."
+    chrombpnet prep splits -c "${chromSizesFiltered}" -tcr "${testChroms}" -vcr "${validationChroms}" -op "${outputPath}/${outputPrefix}"
 
     # List files in the output directory
     echo "Listing files in the output directory..."
     ls -l "${outputPath}/" > ls_files.txt
-
-    head "$chromSizesFiltered"
 
  >>>
 
